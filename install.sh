@@ -4,7 +4,7 @@
 set -e
 
 SKILL_NAME="blazor-rcl-generator"
-REPO_URL="https://github.com/YOUR_USER/blazor-rcl-generator.git"
+REPO_URL="https://github.com/leandrocavalheiro/blazor-rcl-generator.git"
 
 # ── Colors ────────────────────────────────────────────────────────────────────
 BOLD="\033[1m"
