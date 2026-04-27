@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+
+# Projetos gerados pelo scaffold (não versionar saída)
+*/bin/
+*/obj/
+
+# Editores
+.vscode/
+.idea/
+*.swp
