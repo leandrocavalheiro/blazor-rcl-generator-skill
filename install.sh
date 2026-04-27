@@ -46,7 +46,7 @@ bootstrap() {
   if command -v git &>/dev/null; then
     info "Git detected — cloning repository to a temporary directory..."
     TMP_DIR="$(mktemp -d)"
-    if git clone --depth 1 "$REPO_URL" "$TMP_DIR" 2>/dev/null; then
+    if GIT_TERMINAL_PROMPT=0 git clone --depth 1 "$REPO_URL" "$TMP_DIR" 2>/dev/null; then
       SKILL_DIR="$TMP_DIR"
       CLONED=true
       success "Repository cloned."
