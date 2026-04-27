@@ -9,6 +9,8 @@ description: Generates a complete Razor Class Library (RCL) for Blazor with prof
 
 > **Version:** 1.3.0  
 > **Display name (shown in /skills):** Blazor RCL Generator 1.3.0
+> 
+> **Important:** After reinstalling with `./install.sh`, you **must restart OpenCode** (close and reopen) for the new display name to appear. The skill version updates but the UI only refreshes on restart.
 
 ## Changelog
 
@@ -23,17 +25,27 @@ description: Generates a complete Razor Class Library (RCL) for Blazor with prof
 
 ## Step 1: Collect parameters
 
-Before running any commands, ask the user for the following five values and wait for their response:
+Before running any commands, ask the user for the following five values and wait for their response. **Show the default in parentheses and ask for confirmation** — the user can press Enter to accept the default or type a new value.
 
 - **DOTNET_VERSION** — the target .NET version (e.g., `8.0`, `9.0`, `10.0`)
+  - **Default:** `10.0`
+  - Ask: `"DOTNET_VERSION (default: 10.0):"`
 - **PROJECT_NAME** — a PascalCase name with no spaces or special characters (e.g., `MyComponentLib`)
+  - **Default:** (no default — user must provide a name)
+  - Ask: `"PROJECT_NAME:"`
 - **USE_SLNX** — whether to use the newer `.slnx` solution format (`yes` or `no`)
+  - **Default:** `yes`
+  - Ask: `"USE_SLNX - use .slnx format? (default: yes) [y/N]:"`
 - **CREATE_DEMO** — whether to scaffold a Blazor demo app that references the library (`yes` or `no`)
+  - **Default:** `yes`
+  - Ask: `"CREATE_DEMO - scaffold demo project? (default: yes) [y/N]:"`
 - **WORKSPACE_MODE** — how the scaffold should behave regarding the root directory:
   - `new` — create a new folder named `{PROJECT_NAME}` and scaffold everything inside it. Use this when starting from scratch on the local machine.
   - `current` — scaffold directly into the current working directory, without creating an extra root folder. Use this when the user already created and cloned a repository, so the folder for the project already exists.
+  - **Default:** `new`
+  - Ask: `"WORKSPACE_MODE (default: new) [new/current]:"`
 
-Only proceed once all five values have been provided.
+Only proceed once all five values have been provided (all five confirmed, the last two can accept default by pressing Enter).
 
 > **Tip for the user:** If you cloned a repo first (e.g., from GitHub), choose `current` so the solution and projects land directly at the repo root — no double-nested folder.
 
