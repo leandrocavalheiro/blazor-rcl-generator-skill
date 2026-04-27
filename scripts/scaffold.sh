@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # scaffold.sh — Creates a Blazor Razor Class Library project structure
-# Usage: bash scripts/scaffold.sh <PROJECT_NAME> <DOTNET_VERSION> <USE_SLNX> <CREATE_DEMO>
+# Usage: bash scripts/scaffold.sh <PROJECT_NAME> <DOTNET_VERSION> <USE_SLNX> <CREATE_DEMO> <WORKSPACE_MODE>
 
 set -e
 
@@ -8,10 +8,15 @@ PROJECT_NAME="$1"
 DOTNET_VERSION="$2"
 USE_SLNX="$3"
 CREATE_DEMO="$4"
+WORKSPACE_MODE="${5:-new}"
 
-echo "→ Creating workspace: $PROJECT_NAME"
-mkdir "$PROJECT_NAME"
-cd "$PROJECT_NAME"
+if [ "$WORKSPACE_MODE" = "current" ]; then
+  echo "→ Using current directory as workspace"
+else
+  echo "→ Creating workspace: $PROJECT_NAME"
+  mkdir "$PROJECT_NAME"
+  cd "$PROJECT_NAME"
+fi
 
 echo "→ Initializing solution"
 if [ "$USE_SLNX" = "yes" ]; then
@@ -58,6 +63,11 @@ cat > "$PROJECT_NAME.Components/wwwroot/themes/default.css" << 'CSSEOF'
   --lib-shadow:         0 1px 3px 0 rgb(0 0 0 / 0.1);
 }
 CSSEOF
+
+echo "→ Removing boilerplate files"
+rm -f "$PROJECT_NAME.Components/Component1.razor"
+rm -f "$PROJECT_NAME.Components/Component1.razor.css"
+rm -f "$PROJECT_NAME.Components/ExampleJsInterop.cs"
 
 echo ""
 echo "✅ Done! Project created at: $(pwd)"
