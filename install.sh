@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # install.sh — Installs the blazor-rcl-generator skill into detected AI agents
+# Can be run standalone (downloaded from GitHub) or from inside the cloned repo.
 set -e
 
 SKILL_NAME="blazor-rcl-generator"
-SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_URL="https://github.com/YOUR_USER/blazor-rcl-generator.git"
 
 # ── Colors ────────────────────────────────────────────────────────────────────
 BOLD="\033[1m"
@@ -23,18 +24,58 @@ confirm() {
 success() { echo -e "${GREEN}✔${RESET} $1"; }
 skip()    { echo -e "${DIM}–${RESET} $1"; }
 warn()    { echo -e "${YELLOW}⚠${RESET} $1"; }
+info()    { echo -e "${CYAN}→${RESET} $1"; }
+die()     { echo -e "${YELLOW}✘${RESET} $1"; echo ""; exit 1; }
 
 strip_frontmatter() {
   awk '/^---$/{n++; if(n==2){found=1; next}} found' "$SKILL_DIR/SKILL.md"
 }
 
-# ── Detectors ─────────────────────────────────────────────────────────────────
+# ── Bootstrap: ensure skill files are available ───────────────────────────────
+CLONED=false
+TMP_DIR=""
+
+bootstrap() {
+  if [ -f "$SKILL_DIR/SKILL.md" ]; then
+    return  # files already present, nothing to do
+  fi
+
+  warn "SKILL.md not found next to this script."
+  echo ""
+
+  if command -v git &>/dev/null; then
+    info "Git detected — cloning repository to a temporary directory..."
+    TMP_DIR="$(mktemp -d)"
+    if git clone --depth 1 "$REPO_URL" "$TMP_DIR" 2>/dev/null; then
+      SKILL_DIR="$TMP_DIR"
+      CLONED=true
+      success "Repository cloned."
+      echo ""
+    else
+      rm -rf "$TMP_DIR"
+      die "Could not clone $REPO_URL\nCheck your internet connection and try again."
+    fi
+  else
+    die "Git is not installed and skill files are missing.\nInstall Git from https://git-scm.com\nor download the full release at:\n  ${REPO_URL}/releases"
+  fi
+}
+
+# ── Cleanup: remove temp clone on exit ───────────────────────────────────────
+cleanup() {
+  if [ "$CLONED" = true ] && [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
+    rm -rf "$TMP_DIR"
+    info "Temporary clone removed."
+  fi
+}
+trap cleanup EXIT
+
+# ── Agent detectors ───────────────────────────────────────────────────────────
 detect_agents() {
   AGENTS=()
-  command -v claude &>/dev/null || [ -d "$HOME/.claude" ]  && AGENTS+=("claude")
-  command -v opencode &>/dev/null || [ -d "$HOME/.config/opencode" ] && AGENTS+=("opencode")
-  command -v gemini &>/dev/null || [ -d "$HOME/.gemini" ]  && AGENTS+=("gemini")
-  command -v qwen &>/dev/null || command -v qwencoder &>/dev/null   && AGENTS+=("qwen")
+  { command -v claude &>/dev/null || [ -d "$HOME/.claude" ]; }               && AGENTS+=("claude")
+  { command -v opencode &>/dev/null || [ -d "$HOME/.config/opencode" ]; }    && AGENTS+=("opencode")
+  { command -v gemini &>/dev/null || [ -d "$HOME/.gemini" ]; }               && AGENTS+=("gemini")
+  { command -v qwen &>/dev/null || command -v qwencoder &>/dev/null; }       && AGENTS+=("qwen")
 }
 
 # ── Installers ────────────────────────────────────────────────────────────────
@@ -83,12 +124,15 @@ agent_label() {
 }
 
 # ── Main ──────────────────────────────────────────────────────────────────────
+SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo ""
 echo -e "${BOLD}╔══════════════════════════════════════════╗${RESET}"
 echo -e "${BOLD}║   Blazor RCL Generator — Installer      ║${RESET}"
 echo -e "${BOLD}╚══════════════════════════════════════════╝${RESET}"
 echo ""
 
+bootstrap
 detect_agents
 
 if [ ${#AGENTS[@]} -eq 0 ]; then
