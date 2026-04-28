@@ -78,10 +78,20 @@ detect_agents() {
   { command -v qwen &>/dev/null || command -v qwencoder &>/dev/null; }       && AGENTS+=("qwen")
 }
 
+skill_installed() {
+  local dest="$1"
+  [ -f "$dest/SKILL.md" ] || [ -f "$dest/${SKILL_NAME}.md" ]
+}
+
 # ── Installers ────────────────────────────────────────────────────────────────
 install_claude() {
   local dest="$HOME/.claude/skills/$SKILL_NAME"
   mkdir -p "$dest"
+  if skill_installed "$dest"; then
+    echo -e "${DIM}Skill already installed at $dest${RESET}"
+    confirm "Update installation?" || { skip "Claude — skipped"; return; }
+    echo ""
+  fi
   cp "$SKILL_DIR/SKILL.md" "$dest/"
   cp -r "$SKILL_DIR/scripts" "$dest/"
   success "Claude / Claude Code — installed at $dest"
@@ -91,6 +101,11 @@ install_claude() {
 install_opencode() {
   local dest="$HOME/.config/opencode/skills/$SKILL_NAME"
   mkdir -p "$dest"
+  if skill_installed "$dest"; then
+    echo -e "${DIM}Skill already installed at $dest${RESET}"
+    confirm "Update installation?" || { skip "OpenCode — skipped"; return; }
+    echo ""
+  fi
   cp "$SKILL_DIR/SKILL.md" "$dest/"
   cp -r "$SKILL_DIR/scripts" "$dest/"
   success "OpenCode — installed at $dest"
@@ -100,6 +115,11 @@ install_opencode() {
 install_gemini() {
   local dest="$HOME/.gemini/skills/$SKILL_NAME"
   mkdir -p "$dest"
+  if skill_installed "$dest"; then
+    echo -e "${DIM}Skill already installed at $dest${RESET}"
+    confirm "Update installation?" || { skip "Gemini CLI — skipped"; return; }
+    echo ""
+  fi
   strip_frontmatter > "$dest/SKILL.md"
   cp -r "$SKILL_DIR/scripts" "$dest/"
   success "Gemini CLI — installed at $dest"
@@ -109,6 +129,11 @@ install_gemini() {
 install_qwen() {
   local dest="$HOME/.config/qwen/skills"
   mkdir -p "$dest"
+  if skill_installed "$dest"; then
+    echo -e "${DIM}Skill already installed at $dest${RESET}"
+    confirm "Update installation?" || { skip "Qwen Code — skipped"; return; }
+    echo ""
+  fi
   strip_frontmatter > "$dest/$SKILL_NAME.md"
   success "Qwen Code — installed at $dest/$SKILL_NAME.md"
   echo -e "  ${DIM}Usage: qwen --system-prompt ~/.config/qwen/skills/$SKILL_NAME.md${RESET}"
